@@ -3,11 +3,11 @@ import CreateAccount from "./component/CreateAccount";
 import { ethers } from "ethers";
 import { abi } from "./abi/chat.json"
 import { useEffect, useState } from "react";
+import {ContractAddress,SepoliaChainId} from "./assets/contants"
+import MainPage from "./component/MainPage";
 
 
 
-const ContractAddress = "0xd28CC42C8fC63A1929bE181A819ab412c1dAe9D1";
-const SepoliaChainId = 0xaa36a7;
 
 function App() {
 
@@ -15,6 +15,11 @@ function App() {
   const [Address, SetAddress] = useState("");
   const [ChainID, SetChainID] = useState("");
   const [UserExist, SetUserExist] = useState(false);
+  const[Nikename,SetNikename]=useState("");
+  const[FriendList,SetfriendList]=useState([])
+  const[Active,SetActive]=useState("");    
+  const[allMessage,SetallMessage]=useState([]);
+
   const provider = new ethers.BrowserProvider(window.ethereum);
 
 
@@ -26,12 +31,27 @@ function App() {
     if (accounts.length != 0) {
       let x = await CheckUser()
       SetUserExist(x);
+      if(x==true)
+      {
+
+        await GetFriendList();
+        SetallMessage([]);
+        SetActive("");
+      }
     }
   }
 
+
+  const GetFriendList= async ()=>{
+    const signer=await provider.getSigner();
+    const contract = new ethers.Contract(ContractAddress, abi, signer);
+    const friendList= await contract["allfriend()"]();
+    SetfriendList(Array.from(friendList));
+    
+}
   const CheckUser = async () => {
     let signer = await provider.getSigner();
-    const contract = new ethers.Contract(ContractAddress, abi, signer);
+    const contract = new ethers.Contract(ContractAddress, abi, provider);
 
     let bool = (await contract["CheckUser(address signer)"](signer));
     return (bool);
@@ -43,20 +63,12 @@ function App() {
 
     if (Connected == false) {
       let signer = await provider.getSigner();
-      const contract = new ethers.Contract(ContractAddress, abi, signer);
+      let Uexsits = await CheckUser();
+      console.log(Uexsits);
+      SetUserExist(Uexsits);
 
-      let bool = (await contract["CheckUser(address signer)"](signer));
-      console.log(bool);
-      // try {
-      //   let frn = "0x2c42F77c751dd33EF4f3feE75D6D128B2fdA4569";
-      //   let chk = (await contract["Addfriend(address)"](frn));
-      //   console.log(chk);
-      // }
-      // catch (error) {
-      //   console.log(error.revert.args[0]);
-      // }
-      // let res=await contract['allfriend']();
-      // console.log(res);
+
+
       let walletAddress = await signer.getAddress();
       SetAddress(walletAddress);
       SetConnected(true);
@@ -73,6 +85,8 @@ function App() {
 
 
       SetConnected(false);
+      SetUserExist(false);
+      SetNikename("");
       SetAddress("");
     }
 
@@ -94,6 +108,7 @@ function App() {
         SetConnected(true);
         let x = await CheckUser();
         SetUserExist(x)
+
         // console.log(e);
       }
     }).catch((err) => { console.error(err); });
@@ -120,13 +135,14 @@ function App() {
     (
 
       <>
-        <Nav ConnectToWalletButtonHandler={ConnectToWalletButtonHandler} Connected={Connected} Address={Address}></Nav>
-      {UserExist ? (<>chat</>) : (<CreateAccount></CreateAccount>)}
+        <Nav ConnectToWalletButtonHandler={ConnectToWalletButtonHandler} Connected={Connected} Address={Address} Nikename={Nikename} ></Nav>
+        {(UserExist)?(<MainPage FriendList={FriendList} GetFriendList={GetFriendList} SetfriendList={SetfriendList} provider={provider} SetActive={SetActive} Active={Active} allMessage={allMessage} SetallMessage={SetallMessage}/>):(<CreateAccount provider={provider} SetNikename={SetNikename} Nikename={Nikename} SetUserExist={SetUserExist}></CreateAccount>)}
+        
       </>
 
 
     ) :
-    (<h1>Please Connect to Sepolia Newtork</h1>))
+    (<h1>Please Connect to Sepolia Newtork{ChainID}</h1>))
 }
 
 export default App
