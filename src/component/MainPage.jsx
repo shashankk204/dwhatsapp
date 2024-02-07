@@ -14,6 +14,7 @@ const Friends = ({ provider, GetFriendList, FriendList, SetfriendList, SetActive
 
 
     const AddFriend = async () => {
+
         const signer = await provider.getSigner();
         const contract = new ethers.Contract(ContractAddress, abi, signer);
         const txResponse = await contract["Addfriend(address frnTxt)"](frnTxt);
@@ -112,6 +113,7 @@ const Chats = ({ provider, Active, allMessage, SetallMessage }) => {
 const MainPage = ({ provider, GetFriendList, FriendList, SetfriendList, SetActive, Active, allMessage, SetallMessage }) => {
 
     const OpenMessage = async (frn) => {
+        SetallMessage([]);
         const signer = await provider.getSigner();
         const contract = new ethers.Contract(ContractAddress, abi, signer);
         const txResponse = await contract["GetMessage(address frn)"](frn);
