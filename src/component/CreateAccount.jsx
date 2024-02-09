@@ -2,11 +2,13 @@ import { useState } from "react";
 import { Contract, ethers } from "ethers";
 import {abi} from "../abi/chat.json";
 import {ContractAddress} from "../assets/contants"
-
-const CreateAccount = ({provider,SetUserExist,SetUserName}) => {
+import { SetUserExist } from "../store/UserExist";
+import {  useDispatch } from "react-redux";
+import { SetUserName } from "../store/UserName";
+const CreateAccount = ({provider}) => {
     
     const [Txt,SetTxt]=useState("")
-    
+    const dis=useDispatch()
     
      
     
@@ -19,8 +21,8 @@ const CreateAccount = ({provider,SetUserExist,SetUserName}) => {
             const recept=await txresponse.wait();
             // console.log(recept);
 
-            SetUserExist(true);
-            SetUserName(Txt);
+            dis(SetUserExist(true));
+            dis(SetUserName(Txt));
             
             
         }
