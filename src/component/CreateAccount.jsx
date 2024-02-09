@@ -3,7 +3,7 @@ import { Contract, ethers } from "ethers";
 import {abi} from "../abi/chat.json";
 import {ContractAddress} from "../assets/contants"
 
-const CreateAccount = ({provider,Nikename,SetNikename,SetUserExist}) => {
+const CreateAccount = ({provider,SetUserExist,SetUserName}) => {
     
     const [Txt,SetTxt]=useState("")
     
@@ -17,9 +17,10 @@ const CreateAccount = ({provider,Nikename,SetNikename,SetUserExist}) => {
             const contract =new ethers.Contract(ContractAddress, abi, signer);
             const txresponse=await contract["CreateNewUser(string calldata)"](Txt);
             const recept=await txresponse.wait();
-            console.log(recept);
+            // console.log(recept);
+
             SetUserExist(true);
-            SetNikename(Txt);
+            SetUserName(Txt);
             
             
         }

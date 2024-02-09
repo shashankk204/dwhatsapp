@@ -5,7 +5,7 @@ import { ethers } from 'ethers';
 
 
 
-const Friends = ({ provider, GetFriendList, FriendList, SetfriendList, SetActive, Active, OpenMessage }) => {
+const Friends = ({ provider, GetFriendList, FriendList, SetfriendList, SetActive, Active, OpenMessage, FriendsName }) => {
 
     const [frnTxt, SetfrnTxt] = useState("");
 
@@ -17,27 +17,35 @@ const Friends = ({ provider, GetFriendList, FriendList, SetfriendList, SetActive
 
         const signer = await provider.getSigner();
         const contract = new ethers.Contract(ContractAddress, abi, signer);
-        const txResponse = await contract["Addfriend(address frnTxt)"](frnTxt);
+        const txResponse = await contract.Addfriend(frnTxt);
         const receipt = await txResponse.wait();
-        console.log(receipt);
 
         SetfriendList([...FriendList, frnTxt]);
         SetfrnTxt("");
 
     }
 
+    // const GetUserName=async(address)=>
+    // {
+    //     const signer = await provider.getSigner();
+    //     const contract = new ethers.Contract(ContractAddress, abi, signer);
+    //     const Name = await contract.GetUserName(address);
+    //     return Name;
+    // }
+
 
     useEffect(() => {
         GetFriendList();
-        // const fl=["asd",'asf',"as"];
-
     }, []);
 
 
 
     return (<>
-        <ul>{FriendList.map(
-            (e) => {
+        <ul>{(FriendList).map(
+           
+           (e) => {
+
+
                 return (<li key={e}>
                     <button value={e} onClick={async (e) => {
                         SetActive(e.target.value);
@@ -46,6 +54,16 @@ const Friends = ({ provider, GetFriendList, FriendList, SetfriendList, SetActive
                 </li>)
             }
         )}</ul>
+        {/* <ul>{FriendList.map(
+            (e) => {
+                return (<li key={e}>
+                    <button value={e} onClick={async (e) => {
+                        SetActive(e.target.value);
+                        await OpenMessage(e.target.value);
+                    }}>{FriendsName[e]}</button>
+                </li>)
+            }
+        )}</ul> */}
         <>
             <input type="text" name="Friends address" placeholder='Friends address' value={frnTxt} onChange={(e) => { SetfrnTxt(e.target.value) }} />
             <button className="bg-blue-400" onClick={AddFriend}>Add Friend</button>
@@ -55,43 +73,62 @@ const Friends = ({ provider, GetFriendList, FriendList, SetfriendList, SetActive
 
 
 
-const Chats = ({ provider, Active, allMessage, SetallMessage }) => {
+const Chats = ({ provider, Active, allMessage, SetallMessage, Address, TO, OpenMessage }) => {
     const [Messagetxt, SetMessagetxt] = useState("");
 
+    const Eventlistener = (allMessage) => {
+        const contract = new ethers.Contract(ContractAddress, abi, provider);
+        contract.on("NewMessage", async (sender, receiver) => {
+            
+            if (receiver.toUpperCase()
+                == Address.toUpperCase() && Active.toUpperCase()==sender.toUpperCase()) {
+                const signer = await provider.getSigner();
+                const contract = new ethers.Contract(ContractAddress, abi, signer);
+                const txResponse = await contract.GetMessage(sender);
+                if (Array.from(txResponse).length != allMessage.length) {
+                    console.log(allMessage);
+                    SetallMessage(Array.from(txResponse));
+                }
+            }
+        });
+    }
+    useEffect(() => {
+        Eventlistener(allMessage);
+    }, [Active]);
 
     const sendMessage = async () => {
         const signer = await provider.getSigner();
-        const  walletAddress = await signer.getAddress();
+        const walletAddress = await signer.getAddress();
         const contract = new ethers.Contract(ContractAddress, abi, signer);
-        const txResponse = await contract["SendMessage(string calldata Messagetxt,address Active)"](Messagetxt, Active);
+        // const txResponse = await contract["SendMessage(string calldata Messagetxt,address Active)"](Messagetxt, Active);
+        const txResponse = await contract.SendMessage(Messagetxt, Active, BigInt(0));
         const receipt = await txResponse.wait();
-        SetallMessage([...allMessage,{Text:Messagetxt,sender:walletAddress,receiver:Active}]);
+        SetallMessage([...allMessage, { Text: Messagetxt, sender: walletAddress, receiver: Active }]);
         SetMessagetxt("");
-        console.log(receipt);
     }
 
     return (
         <>
-        <div>
+            <div>
 
-            <h1>{`TO ${Active}`}</h1>
-            {(Active == "") ? (<></>):(<>
-                <div></div>
-                <input type="text" placeholder='Type your Message' value={Messagetxt} onChange={(e) => { SetMessagetxt(e.target.value) }} />
-                <button className="bg-blue-400" onClick={sendMessage}>Send</button></>)}
-        </div>
-        
-        
-        
-        <div>
-            {allMessage.map((e)=>{
-                return(<div key={e.sender}>
-                    sender:{e.sender}
-                    <br />
-                    Message:{e.Text}
-                </div>)
-            })}
-        </div>
+                <h1>{`TO ${TO}`}</h1>
+                {(Active == "") ? (<></>) : (<>
+                    <div>Active{Active}</div>
+                    <input type="text" placeholder='Type your Message' value={Messagetxt} onChange={(e) => { SetMessagetxt(e.target.value) }} />
+                    <button className="bg-blue-400" onClick={sendMessage}>Send</button></>)}
+            </div>
+
+
+
+            <div>
+                {allMessage.map((e) => {
+                    return (<div>
+                        sender:{e.sender}
+                        <br />
+                        Message:{e.Text}
+                    </div>)
+                })}
+            </div>
         </>
     )
 }
@@ -110,24 +147,26 @@ const Chats = ({ provider, Active, allMessage, SetallMessage }) => {
 
 
 
-const MainPage = ({ provider, GetFriendList, FriendList, SetfriendList, SetActive, Active, allMessage, SetallMessage }) => {
+const MainPage = ({ provider, Address, GetFriendList, FriendList, SetfriendList, SetActive, Active, allMessage, SetallMessage, To, setTO }) => {
+
+
 
     const OpenMessage = async (frn) => {
         SetallMessage([]);
         const signer = await provider.getSigner();
+
         const contract = new ethers.Contract(ContractAddress, abi, signer);
-        const txResponse = await contract["GetMessage(address frn)"](frn);
-        // txResponse=;
-        // txResponse.map((e)=>{return Array.from(e)});
+        const txResponse = await contract.GetMessage(frn);
+        const name = await contract.GetUserName(frn);
+        setTO(name);
         SetallMessage(Array.from(txResponse))
-        console.log(txResponse);
 
     }
 
     return (
         <>
-            <Friends provider={provider} Active={Active} GetFriendList={GetFriendList} FriendList={FriendList} SetfriendList={SetfriendList} SetActive={SetActive} OpenMessage={OpenMessage}></Friends>
-            <Chats provider={provider} Active={Active} allMessage={allMessage} SetallMessage={SetallMessage}></Chats>
+            <Friends provider={provider} To={To} setTO={setTO} Active={Active} GetFriendList={GetFriendList} FriendList={FriendList} SetfriendList={SetfriendList} SetActive={SetActive} OpenMessage={OpenMessage} ></Friends>
+            <Chats provider={provider} Active={Active} OpenMessage={OpenMessage} Address={Address} allMessage={allMessage} SetallMessage={SetallMessage} setTO={setTO} TO={To}></Chats>
         </>
     )
 }

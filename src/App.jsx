@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import {ContractAddress,SepoliaChainId} from "./assets/contants"
 import MainPage from "./component/MainPage";
 
-
+  
 
 
 function App() {
@@ -15,19 +15,22 @@ function App() {
   const [Address, SetAddress] = useState("");
   const [ChainID, SetChainID] = useState("");
   const [UserExist, SetUserExist] = useState(false);
-  const[Nikename,SetNikename]=useState("");
   const[FriendList,SetfriendList]=useState([])
   const[Active,SetActive]=useState("");    
   const[allMessage,SetallMessage]=useState([]);
-
+  const[UserName,SetUserName]=useState("");
+  const [To,setTO]=useState("")
   const provider = new ethers.BrowserProvider(window.ethereum);
 
 
 
+  const FriendsName={};
 
 
   async function handleAccountsChanged(accounts) {
+    setTO("");
     SetAddress(accounts[0]);
+    SetUserName("")
     if (accounts.length != 0) {
       let x = await CheckUser()
       SetUserExist(x);
@@ -41,19 +44,31 @@ function App() {
     }
   }
 
-
+ 
   const GetFriendList= async ()=>{
     const signer=await provider.getSigner();
     const contract = new ethers.Contract(ContractAddress, abi, signer);
-    const friendList= await contract["allfriend()"]();
-    SetfriendList(Array.from(friendList));
+    // const friendList= await contract["allfriend()"]();
+    const txn=await contract.allfriend();
+     Array.from(txn).forEach(async (e)=>
+    {
+      FriendsName[e]=await contract.GetUserName(e)
+    })     
+    console.log(FriendsName)
     
-}
+    
+    SetfriendList( Array.from(txn));
+     
+} 
   const CheckUser = async () => {
     let signer = await provider.getSigner();
     const contract = new ethers.Contract(ContractAddress, abi, provider);
-
-    let bool = (await contract["CheckUser(address signer)"](signer));
+    let bool =await contract.CheckUser(signer);
+    if(bool)
+    {
+      const Name=await contract.GetUserName(signer);
+      SetUserName(Name);
+    }
     return (bool);
   }
 
@@ -86,7 +101,6 @@ function App() {
 
       SetConnected(false);
       SetUserExist(false);
-      SetNikename("");
       SetAddress("");
     }
 
@@ -135,8 +149,8 @@ function App() {
     (
 
       <>
-        <Nav ConnectToWalletButtonHandler={ConnectToWalletButtonHandler} Connected={Connected} Address={Address} Nikename={Nikename} ></Nav>
-        {(UserExist)?(<MainPage FriendList={FriendList} GetFriendList={GetFriendList} SetfriendList={SetfriendList} provider={provider} SetActive={SetActive} Active={Active} allMessage={allMessage} SetallMessage={SetallMessage}/>):(<CreateAccount provider={provider} SetNikename={SetNikename} Nikename={Nikename} SetUserExist={SetUserExist}></CreateAccount>)}
+        <Nav ConnectToWalletButtonHandler={ConnectToWalletButtonHandler} Connected={Connected} Name={UserName}  ></Nav>
+        {(UserExist)?(<MainPage To={To} setTO={setTO} Address={Address} FriendList={FriendList} GetFriendList={GetFriendList} SetfriendList={SetfriendList} provider={provider} SetActive={SetActive} Active={Active} allMessage={allMessage} FriendsName={FriendsName} SetallMessage={SetallMessage}/>):(<CreateAccount SetUserName={SetUserName} provider={provider}   SetUserExist={SetUserExist}></CreateAccount>)}
         
       </>
 
