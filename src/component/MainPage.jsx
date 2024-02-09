@@ -8,12 +8,23 @@ import { SetFriendList } from '../store/FriendList';
 import { EmptyallMessage, SetallMessage } from '../store/allMessage';
 
 
-const Friends = ({ provider, GetFriendList,   OpenMessage }) => {
-    const Connected=useSelector(state=>state.Connected.value)
+
+
+
+
+
+
+
+
+
+
+
+const Friends = ({ provider, GetFriendList, OpenMessage }) => {
+    const Connected = useSelector(state => state.Connected.value)
     const [frnTxt, SetfrnTxt] = useState("");
-    const dis=useDispatch()
-    const FriendList=useSelector(state=>state.FriendList.value)
-    
+    const dis = useDispatch()
+    const FriendList = useSelector(state => state.FriendList.value)
+
 
     const AddFriend = async () => {
 
@@ -22,9 +33,9 @@ const Friends = ({ provider, GetFriendList,   OpenMessage }) => {
         const txResponse = await contract.Addfriend(frnTxt);
         const receipt = await txResponse.wait();
         // const name=await contract.user
-        const Name=await contract.GetUserName(frnTxt)
-        let obj={}
-        obj[frnTxt]=Name
+        const Name = await contract.GetUserName(frnTxt)
+        let obj = {}
+        obj[frnTxt] = Name
         dis(SetFriendList(obj));
         SetfrnTxt("");
 
@@ -34,49 +45,88 @@ const Friends = ({ provider, GetFriendList,   OpenMessage }) => {
 
     useEffect(() => {
 
-        if(Connected)
-        {
-            GetFriendList()};
-    
+        if (Connected) {
+            GetFriendList()
+        };
+
     }, []);
 
 
 
     return (<>
-        <ul>{(FriendList).map(
-           
-           (e) => {
-                const k=Object.keys(e);
-                const v=Object.values(e)
-                return (<li key={k}>
-                    <button value={k} onClick={async (e) => {
-                        dis(SetActive(e.target.value));
-                        await OpenMessage(e.target.value);
-                    }}>{v}</button>
-                </li>)
-            }
-        )}</ul>
-        
+        <div className="flex flex-col h-screen">
+            <div className="bg-gray-200 py-4 sticky top-0 z-10">
+
+
+                <input type="text" name="Friends address" placeholder='Friends address' value={frnTxt} onChange={(e) => { SetfrnTxt(e.target.value) }} />
+                <button className="bg-blue-400" onClick={AddFriend}>Add Friend</button>
+            </div>
+            <div  className="flex-1 overflow-y-auto">
+
+                <ul>{(FriendList).map(
+
+                    (e) => {
+                        const k = Object.keys(e);
+                        const v = Object.values(e)
+                        return (<li key={k}>
+                            <button value={k} onClick={async (e) => {
+                                dis(SetActive(e.target.value));
+                                await OpenMessage(e.target.value);
+                            }}>{v}</button>
+                        </li>)
+                    }
+                )}</ul>
+            </div>
+
+        </div>
         <>
-            <input type="text" name="Friends address" placeholder='Friends address' value={frnTxt} onChange={(e) => { SetfrnTxt(e.target.value) }} />
-            <button className="bg-blue-400" onClick={AddFriend}>Add Friend</button>
         </>
     </>)
 }
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const Chats = ({ provider, TO }) => {
-    
+
     const [Messagetxt, SetMessagetxt] = useState("");
-    const Address=useSelector(state=>state.Address.value);
-    const Active=useSelector(state=>state.Active.value);
-    const allMessage=useSelector(state=>state.allMessage.value);
-    const dis=useDispatch()
+    const Address = useSelector(state => state.Address.value);
+    const Active = useSelector(state => state.Active.value);
+    const allMessage = useSelector(state => state.allMessage.value);
+    const dis = useDispatch()
     // const Eventlistener = () => {
     //     const contract = new ethers.Contract(ContractAddress, abi, provider);
     //     contract.on("NewMessage", async (sender, receiver) => {
-            
+
     //         if (receiver.toUpperCase()
     //             == Address.toUpperCase() && Active.toUpperCase()==sender.toUpperCase()) {
     //             const signer = await provider.getSigner();
@@ -85,7 +135,7 @@ const Chats = ({ provider, TO }) => {
     //             let n=Array.from(txResponse).length
     //             console.log(allMessage);
     //             dis(SetallMessage(Array.from(txResponse)[n-1]));
-                
+
     //         }
     //     }
     //     );
@@ -93,39 +143,39 @@ const Chats = ({ provider, TO }) => {
     useEffect(() => {
         const contract = new ethers.Contract(ContractAddress, abi, provider);
         contract.on("NewMessage", async (sender, receiver) => {
-            
+
             if (receiver.toUpperCase()
-                == Address.toUpperCase() && Active.toUpperCase()==sender.toUpperCase()) {
+                == Address.toUpperCase() && Active.toUpperCase() == sender.toUpperCase()) {
                 const signer = await provider.getSigner();
                 const contract = new ethers.Contract(ContractAddress, abi, signer);
                 const txResponse = await contract.GetMessage(sender);
-                let n=Array.from(txResponse).length
-                let arr=Array.from(txResponse)[n-1];
-                arr=Array.from(arr);
-                console.log("allmessages",arr);
-                let obj={};
-                obj["Text"]=arr[0];
-                obj["sender"]=arr[1];
-                obj["receiver"]=arr[2];
-                obj["TypeOFMessage"]=Number(arr[3]);
+                let n = Array.from(txResponse).length
+                let arr = Array.from(txResponse)[n - 1];
+                arr = Array.from(arr);
+                console.log("allmessages", arr);
+                let obj = {};
+                obj["Text"] = arr[0];
+                obj["sender"] = arr[1];
+                obj["receiver"] = arr[2];
+                obj["TypeOFMessage"] = Number(arr[3]);
                 dis(SetallMessage(obj));
-                
+
             }
         }
         )
-        return(
-            ()=>{
+        return (
+            () => {
                 contract.off("NewMessage", async (sender, receiver) => {
-            
+
                     if (receiver.toUpperCase()
-                        == Address.toUpperCase() && Active.toUpperCase()==sender.toUpperCase()) {
+                        == Address.toUpperCase() && Active.toUpperCase() == sender.toUpperCase()) {
                         const signer = await provider.getSigner();
                         const contract = new ethers.Contract(ContractAddress, abi, signer);
                         const txResponse = await contract.GetMessage(sender);
-                        let n=Array.from(txResponse).length
+                        let n = Array.from(txResponse).length
                         console.log(allMessage);
-                        dis(SetallMessage(Array.from(txResponse)[n-1]));
-                        
+                        dis(SetallMessage(Array.from(txResponse)[n - 1]));
+
                     }
                 }
                 )
@@ -139,31 +189,33 @@ const Chats = ({ provider, TO }) => {
         const contract = new ethers.Contract(ContractAddress, abi, signer);
         const txResponse = await contract.SendMessage(Messagetxt, Active, BigInt(0));
         const receipt = await txResponse.wait();
-        
-        dis(SetallMessage({ Text: Messagetxt, sender: walletAddress, receiver: Active ,TypeOFMessage:0}));
+
+        dis(SetallMessage({ Text: Messagetxt, sender: walletAddress, receiver: Active, TypeOFMessage: 0 }));
         SetMessagetxt("");
     }
 
     return (
         <>
-            <div>
 
-                <h1>{`TO ${TO}`}</h1>
-                {(Active == "") ? (<></>) : (<>
-                    <input type="text" placeholder='Type your Message' value={Messagetxt} onChange={(e) => { SetMessagetxt(e.target.value) }} />
-                    <button className="bg-blue-400" onClick={sendMessage}>Send</button></>)}
-            </div>
+            <div className="flex flex-col h-screen">
 
+                <h1 className="bg-gray-200 py-4 sticky top-0 z-10">{`TO ${TO}`}</h1>
 
+                <div className="flex-1 overflow-y-auto">
+                    {allMessage.map((e) => {
+                        return (<div key={e.key}>
+                            sender:{e.sender}
+                            <br />
+                            Message:{e.Text}
+                        </div>)
+                    })}
+                </div>
+                <div className="bg-gray-200 py-4">
 
-            <div>
-                {allMessage.map((e) => {
-                    return (<div key={e.key}>
-                        sender:{e.sender}
-                        <br />
-                        Message:{e.Text}
-                    </div>)
-                })}
+                    {(Active == "") ? (<></>) : (<>
+                        <input type="text" placeholder='Type your Message' value={Messagetxt} onChange={(e) => { SetMessagetxt(e.target.value) }} />
+                        <button className="bg-blue-800" onClick={sendMessage}>Send</button></>)}
+                </div>
             </div>
         </>
     )
@@ -183,10 +235,19 @@ const Chats = ({ provider, TO }) => {
 
 
 
-const MainPage = ({ provider, GetFriendList,To, setTO }) => {
 
-    const dis=useDispatch()
-    
+
+
+
+
+
+
+
+
+const MainPage = ({ provider, GetFriendList, To, setTO }) => {
+
+    const dis = useDispatch()
+
     const OpenMessage = async (frn) => {
         dis(EmptyallMessage());
         const signer = await provider.getSigner();
@@ -196,15 +257,14 @@ const MainPage = ({ provider, GetFriendList,To, setTO }) => {
         const name = await contract.GetUserName(frn);
         setTO(name);
         Array.from(txResponse).forEach(
-            (e)=>
-            {
-                let obj={};
-                obj["Text"]=Array.from(e)[0];
-                obj["sender"]=Array.from(e)[1];
-                obj["receiver"]=Array.from(e)[2];
-                obj["TypeOFMessage"]=Number(Array.from(e)[3]);
+            (e) => {
+                let obj = {};
+                obj["Text"] = Array.from(e)[0];
+                obj["sender"] = Array.from(e)[1];
+                obj["receiver"] = Array.from(e)[2];
+                obj["TypeOFMessage"] = Number(Array.from(e)[3]);
 
-                
+
                 dis(SetallMessage(obj))
 
             }
@@ -214,8 +274,15 @@ const MainPage = ({ provider, GetFriendList,To, setTO }) => {
 
     return (
         <>
-            <Friends provider={provider}   GetFriendList={GetFriendList} OpenMessage={OpenMessage}  ></Friends>
-            <Chats provider={provider}  OpenMessage={OpenMessage}  TO={To}></Chats>
+            
+            <div className='flex flex-row '>
+                <div className='basis-2/5 border-r-4'>
+                    <Friends provider={provider} GetFriendList={GetFriendList} OpenMessage={OpenMessage}  ></Friends>
+                </div>
+                <div className='basis-3/5'>
+                    <Chats provider={provider} OpenMessage={OpenMessage} TO={To}></Chats>
+                </div>
+            </div>
         </>
     )
 }
