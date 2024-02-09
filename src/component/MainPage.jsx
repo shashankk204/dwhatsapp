@@ -55,13 +55,15 @@ const Friends = ({ provider, GetFriendList, OpenMessage }) => {
 
     return (<>
         <div className="flex flex-col h-screen">
-            <div className="bg-gray-200 py-4 sticky top-0 z-10">
+            <div className="bg-gray-200 py-7 sticky top-0 z-10 ">
 
+                <div className='flex justify-center'>
 
-                <input type="text" name="Friends address" placeholder='Friends address' value={frnTxt} onChange={(e) => { SetfrnTxt(e.target.value) }} />
-                <button className="bg-blue-400" onClick={AddFriend}>Add Friend</button>
+                    <input type="text" name="Friends address" placeholder='Friends address' value={frnTxt} onChange={(e) => { SetfrnTxt(e.target.value) }} />
+                    <button className="bg-blue-400" onClick={AddFriend}>Add Friend</button>
+                </div>
             </div>
-            <div  className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto">
 
                 <ul>{(FriendList).map(
 
@@ -196,27 +198,40 @@ const Chats = ({ provider, TO }) => {
 
     return (
         <>
+            {(Active == "") ? (<></>) :
+                (<>
 
-            <div className="flex flex-col h-screen">
+                    <div className="flex flex-col h-screen">
 
-                <h1 className="bg-gray-200 py-4 sticky top-0 z-10">{`TO ${TO}`}</h1>
+                        <h1 className="bg-gray-200  sticky top-0 z-10 py-7 px-28" >{`${TO}`}</h1>
 
-                <div className="flex-1 overflow-y-auto">
-                    {allMessage.map((e) => {
-                        return (<div key={e.key}>
-                            sender:{e.sender}
-                            <br />
-                            Message:{e.Text}
-                        </div>)
-                    })}
-                </div>
-                <div className="bg-gray-200 py-4">
+                        <div className="flex-1 overflow-y-auto">
+                            {allMessage.map((e) => {
+                                const isMessageFromActiveUser = (e.sender.toUpperCase() === Active.toUpperCase());
+                                const messageClass = isMessageFromActiveUser ? "justify-end" : "justify-start";
+                                return (<>
+                                    <div className={`flex ${messageClass} mb-2`} key={e.key}>
 
-                    {(Active == "") ? (<></>) : (<>
-                        <input type="text" placeholder='Type your Message' value={Messagetxt} onChange={(e) => { SetMessagetxt(e.target.value) }} />
-                        <button className="bg-blue-800" onClick={sendMessage}>Send</button></>)}
-                </div>
-            </div>
+                                        <div className={`bg-gray-300 p-2 rounded  : ''}`}>
+
+                                            <div className='p-4' >
+
+
+                                                {e.Text}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                                )
+                            })}
+                        </div>
+                        <div className="bg-gray-200 py-6">
+
+                            <input type="text" placeholder='Type your Message' value={Messagetxt} onChange={(e) => { SetMessagetxt(e.target.value) }} />
+                            <button className="bg-blue-800" onClick={sendMessage}>Send</button>
+                        </div>
+                    </div>
+                </>)}
         </>
     )
 }
@@ -274,7 +289,7 @@ const MainPage = ({ provider, GetFriendList, To, setTO }) => {
 
     return (
         <>
-            
+
             <div className='flex flex-row '>
                 <div className='basis-2/5 border-r-4'>
                     <Friends provider={provider} GetFriendList={GetFriendList} OpenMessage={OpenMessage}  ></Friends>
