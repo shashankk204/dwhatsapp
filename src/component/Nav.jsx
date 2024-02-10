@@ -5,7 +5,7 @@ const Nav = ({ConnectToWalletButtonHandler}) => {
     const Connected=useSelector(state=>state.Connected.value)
     return (
         <>
-            <button className="bg-blue-400 rounded-md p-4" onClick={ConnectToWalletButtonHandler}>
+            <button className="bg-blue-300 rounded-lg p-1" onClick={ConnectToWalletButtonHandler}>
         {(Connected==true) ?`disconnect:-${Name} ` : "connect"}
       </button>
         </>

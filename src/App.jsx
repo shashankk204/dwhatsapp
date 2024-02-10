@@ -169,13 +169,18 @@ function App() {
      
       
         {(UserExist)?
-          (<div><MainPage  GetFriendList={GetFriendList} setTO={setTO} To={To} provider={provider}/></div>)
+          (<div><MainPage ConnectToWalletButtonHandler={ConnectToWalletButtonHandler} GetFriendList={GetFriendList} setTO={setTO} To={To} provider={provider}/></div>)
           :
           (<>{(Connected)?(<CreateAccount provider={provider}></CreateAccount>):(<></>)}</>)
         }
-        <div>
+        {
+          Connected?
+          (<></>)
+          :
+          (<div>
           <Nav ConnectToWalletButtonHandler={ConnectToWalletButtonHandler}></Nav>
-        </div>
+        </div>)
+        }
       
       </>
 
