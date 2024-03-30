@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { GetContract, GetSigner } from "./Utils/Util";
+import { GetContract, GetSigner } from "../Utils/Util";
 
-import { SetAddress } from "./store/Address";
-import { SetConnected } from "./store/Connected";
-import { SetUserExist } from "./store/UserExist";
-import { SetUserName } from "./store/UserName";
-import { SetFriendList, EmptyFriendList } from "./store/FriendList";
-import { SetActive } from "./store/Active";
-import { EmptyallMessage } from "./store/allMessage";
+import { SetAddress } from "../store/Address";
+import { SetConnected } from "../store/Connected";
+import { SetUserExist } from "../store/UserExist";
+import { SetUserName } from "../store/UserName";
+import { SetFriendList, EmptyFriendList } from "../store/FriendList";
+import { SetActive } from "../store/Active";
+import { EmptyallMessage } from "../store/allMessage";
 
-import Homepage from "./Pages/HomePage";
-import CreateAccount from "./Pages/CreateAccount";
-import MainPage from "./Pages/MainPage";
+import Homepage from "../Pages/HomePage";
+import CreateAccount from "../Pages/CreateAccount";
+import MainPage from "../Pages/MainPage";
 
-import { SepoliaChainId } from "./assets/contants"
+import { SepoliaChainId } from "../assets/contants"
 
 
 
