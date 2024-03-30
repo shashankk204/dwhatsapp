@@ -11,9 +11,9 @@ import { SetFriendList, EmptyFriendList } from "./store/FriendList";
 import { SetActive } from "./store/Active";
 import { EmptyallMessage } from "./store/allMessage";
 
-import Nav from "./component/Nav"
+import Homepage from "./Pages/HomePage";
 import CreateAccount from "./Pages/CreateAccount";
-import MainPage from "./component/MainPage";
+import MainPage from "./Pages/MainPage";
 
 import { SepoliaChainId } from "./assets/contants"
 
@@ -105,11 +105,16 @@ function App() {
     Dispatch(SetUserName(""))
     if (accounts.length != 0) 
     {
-      let x = await CheckUser()
+      let x = await CheckUser();
       Dispatch(SetUserExist(x));
       if (x == true) 
       {
         await GetFriendList();
+        Dispatch(EmptyallMessage());
+        Dispatch(SetActive(""));
+      }
+      else
+      {
         Dispatch(EmptyallMessage());
         Dispatch(SetActive(""));
       }
@@ -159,12 +164,7 @@ function App() {
 
 
   return ((ChainID == SepoliaChainId) ?
-    (
-
-      <>
-
-
-        {(UserExist) ?
+    (<>{(UserExist) ?
           (<div><MainPage ConnectToWalletButtonHandler={ConnectToWalletButtonHandler} GetFriendList={GetFriendList} setTO={setTO} To={To} /></div>)
           :
           (<>{(Connected) ? (<CreateAccount ></CreateAccount>) : (<></>)}</>)
@@ -174,7 +174,7 @@ function App() {
             (<></>)
             :
             (<div>
-              <Nav ConnectToWalletButtonHandler={ConnectToWalletButtonHandler}></Nav>
+              <Homepage ConnectToWalletButtonHandler={ConnectToWalletButtonHandler}></Homepage>
             </div>)
         }
 
