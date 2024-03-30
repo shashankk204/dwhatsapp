@@ -6,6 +6,7 @@ DWhatsApp is a decentralized chatting application built on the Ethereum blockcha
 ## Tech Stack 
 <ul>
   <li>Reactjs</li>
+  <li>React Router</li>
   <li>React Redux toolkit</li>
   <li>Hardhat</li>
   <li>Etherjs</li>
