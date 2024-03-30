@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { abi } from '../abi/chat.json'
-import { ContractAddress } from "../assets/contants"
-import { ethers } from 'ethers';
 import { useDispatch, useSelector } from 'react-redux';
+
 import { SetActive } from '../store/Active';
 import { SetFriendList } from '../store/FriendList';
 import { EmptyallMessage, SetallMessage } from '../store/allMessage';
+
+import { GetContract, GetContractWithOutSigner, GetSigner } from '../Utils/Util';
+
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
@@ -40,7 +41,7 @@ const FriendlistItemStyle = {
 
 
 
-const Friends = ({ provider, GetFriendList, OpenMessage }) => {
+const Friends = ({ GetFriendList, OpenMessage }) => {
     const Connected = useSelector(state => state.Connected.value)
     const [frnTxt, SetfrnTxt] = useState("");
     const dis = useDispatch()
@@ -48,11 +49,13 @@ const Friends = ({ provider, GetFriendList, OpenMessage }) => {
     const [loading, setLoading] = useState(false);
     const [disabled, setdisabled] = useState(false);
 
+
+
     const AddFriend = async () => {
         setLoading(true);
         setdisabled(true);
-        const signer = await provider.getSigner();
-        const contract = new ethers.Contract(ContractAddress, abi, signer);
+        // const signer = await provider.getSigner();
+        const contract = await GetContract();
         const txResponse = await contract.Addfriend(frnTxt);
         const receipt = await txResponse.wait();
         // const name=await contract.user
@@ -164,93 +167,67 @@ const Friends = ({ provider, GetFriendList, OpenMessage }) => {
 
 
 
-const Chats = ({ provider, TO, ConnectToWalletButtonHandler }) => {
+const Chats = ({TO, ConnectToWalletButtonHandler }) => {
 
     const [Messagetxt, SetMessagetxt] = useState("");
+   
+    const dis = useDispatch()
     const Address = useSelector(state => state.Address.value);
     const Active = useSelector(state => state.Active.value);
     const allMessage = useSelector(state => state.allMessage.value);
-    const dis = useDispatch()
-    // const Eventlistener = () => {
-    //     const contract = new ethers.Contract(ContractAddress, abi, provider);
-    //     contract.on("NewMessage", async (sender, receiver) => {
+   
 
-    //         if (receiver.toUpperCase()
-    //             == Address.toUpperCase() && Active.toUpperCase()==sender.toUpperCase()) {
-    //             const signer = await provider.getSigner();
-    //             const contract = new ethers.Contract(ContractAddress, abi, signer);
-    //             const txResponse = await contract.GetMessage(sender);
-    //             let n=Array.from(txResponse).length
-    //             console.log(allMessage);
-    //             dis(SetallMessage(Array.from(txResponse)[n-1]));
 
-    //         }
-    //     }
-    //     );
-    // }
-    useEffect(() => {
-        const contract = new ethers.Contract(ContractAddress, abi, provider);
-        contract.on("NewMessage", async (sender, receiver) => {
-
-            if (receiver.toUpperCase()
-                == Address.toUpperCase() && Active.toUpperCase() == sender.toUpperCase()) {
-                const signer = await provider.getSigner();
-                const contract = new ethers.Contract(ContractAddress, abi, signer);
-                const txResponse = await contract.GetMessage(sender);
-                let n = Array.from(txResponse).length
-                let arr = Array.from(txResponse)[n - 1];
-                arr = Array.from(arr);
-                let obj = {};
-                obj["Text"] = arr[0];
-                obj["sender"] = arr[1];
-                obj["receiver"] = arr[2];
-                obj["TypeOFMessage"] = Number(arr[3]);
-                dis(SetallMessage(obj));
-
-            }
-        }
-        )
-        return (
-            () => {
-                contract.off("NewMessage", async (sender, receiver) => {
-
-                    if (receiver.toUpperCase()
-                        == Address.toUpperCase() && Active.toUpperCase() == sender.toUpperCase()) {
-                        const signer = await provider.getSigner();
-                        const contract = new ethers.Contract(ContractAddress, abi, signer);
-                        const txResponse = await contract.GetMessage(sender);
-                        let n = Array.from(txResponse).length
-                        let arr = Array.from(txResponse)[n - 1];
-                        arr = Array.from(arr);
-                        let obj = {};
-                        obj["Text"] = arr[0];
-                        obj["sender"] = arr[1];
-                        obj["receiver"] = arr[2];
-                        obj["TypeOFMessage"] = Number(arr[3]);
-                        dis(SetallMessage(obj));
-                    }
-                }
-                )
-            }
-        )
-    }, [Active]);
+   
+   
     const [LoadingSend, setLoading] = useState(false);
     const [DisabledSend, setDisabled] = useState(false);
-
     const sendMessage = async () => {
         setLoading(true)
         setDisabled(true)
-        const signer = await provider.getSigner();
+        const signer = await GetSigner();
         const walletAddress = await signer.getAddress();
-        const contract = new ethers.Contract(ContractAddress, abi, signer);
+        const contract = await GetContract();
         const txResponse = await contract.SendMessage(Messagetxt, Active, BigInt(0));
         const receipt = await txResponse.wait();
-
         dis(SetallMessage({ Text: Messagetxt, sender: walletAddress, receiver: Active, TypeOFMessage: 0 }));
         SetMessagetxt("");
         setLoading(false)
         setDisabled(false)
     }
+
+  
+    const newMessageEventListener=async (sender,receiver)=>
+    {
+        if (receiver.toUpperCase() == Address.toUpperCase() && Active.toUpperCase() == sender.toUpperCase()) 
+        {
+            const contract = await GetContract();
+            const txResponse = await contract.GetMessage(sender);
+            let n = Array.from(txResponse).length
+            let arr = Array.from(txResponse)[n - 1];
+            arr = Array.from(arr);
+            let obj = {};
+            obj["Text"] = arr[0];
+            obj["sender"] = arr[1];
+            obj["receiver"] = arr[2];
+            obj["TypeOFMessage"] = Number(arr[3]);
+            dis(SetallMessage(obj));
+        }
+    }
+
+
+
+    useEffect(() => {
+        const contract = GetContractWithOutSigner();
+        contract.on("NewMessage", newMessageEventListener)
+        return (
+            () => 
+            {
+                contract.off("NewMessage", newMessageEventListener)
+            })
+    }, [Active]);
+
+
 
     return (
         <>
@@ -271,7 +248,7 @@ const Chats = ({ provider, TO, ConnectToWalletButtonHandler }) => {
                         </h1>
 
                         <div className="flex-1 overflow-y-auto flex flex-col-reverse">
-                            {allMessage.map((e) => {
+                            {allMessage.slice().reverse().map((e) => {
                                 const isMessageFromActiveUser = (e.sender.toUpperCase() === Active.toUpperCase());
                                 const messageClass = !isMessageFromActiveUser ? "justify-end" : "justify-start";
                                 return (
@@ -334,15 +311,14 @@ const Chats = ({ provider, TO, ConnectToWalletButtonHandler }) => {
 
 
 
-const MainPage = ({ provider, GetFriendList, To, setTO, ConnectToWalletButtonHandler }) => {
+const MainPage = ({  GetFriendList, To, setTO, ConnectToWalletButtonHandler }) => {
 
     const dis = useDispatch()
 
     const OpenMessage = async (frn) => {
         dis(EmptyallMessage());
-        const signer = await provider.getSigner();
 
-        const contract = new ethers.Contract(ContractAddress, abi, signer);
+        const contract = await GetContract();
         const txResponse = await contract.GetMessage(frn);
         const name = await contract.GetUserName(frn);
         setTO(name);
@@ -367,10 +343,10 @@ const MainPage = ({ provider, GetFriendList, To, setTO, ConnectToWalletButtonHan
 
             <div className='flex flex-row '>
                 <div className='basis-2/5 border-r-4'>
-                    <Friends provider={provider} GetFriendList={GetFriendList} OpenMessage={OpenMessage}  ></Friends>
+                    <Friends GetFriendList={GetFriendList} OpenMessage={OpenMessage}  ></Friends>
                 </div>
                 <div className='basis-3/5'>
-                    <Chats ConnectToWalletButtonHandler={ConnectToWalletButtonHandler} provider={provider} OpenMessage={OpenMessage} TO={To}></Chats>
+                    <Chats ConnectToWalletButtonHandler={ConnectToWalletButtonHandler} OpenMessage={OpenMessage} TO={To}></Chats>
                 </div>
             </div>
         </>
