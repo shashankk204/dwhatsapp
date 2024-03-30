@@ -70,30 +70,7 @@ function App() {
 
 
 
-  const ConnectToWalletButtonHandler = async () => {
-    if (Connected == false) {
-      let signer = await GetSigner();
-      let Uexsits = await CheckUser();
-      Dispatch(SetUserExist(Uexsits));
-      let walletAddress = await signer.getAddress();
-      Dispatch(SetAddress(walletAddress));
-      Dispatch(SetConnected(true));
-    }
-    else {
-      await window.ethereum.request({
-        "method": "wallet_revokePermissions",
-        "params": [
-          {
-            "eth_accounts": {}
-          }
-        ]
-      });
-      Dispatch(SetConnected(false));
-      Dispatch(SetUserExist(false));
-      Dispatch(SetAddress(""));
-    }
-
-  }
+  
 
 
 
@@ -129,6 +106,7 @@ function App() {
     let accounts = await window.ethereum.request({ method: 'eth_accounts' })
     if (accounts.length !== 0) 
     {
+
         Dispatch(SetAddress(accounts[0]));
         Dispatch(SetConnected(true));
         let x = await CheckUser();
@@ -151,8 +129,7 @@ function App() {
         window.ethereum.off('chainChanged', (chainID) => { SetChainID(chainID) });
 
       }
-    }, []
-  )
+    }, [])
 
 
 
@@ -165,7 +142,7 @@ function App() {
 
   return ((ChainID == SepoliaChainId) ?
     (<>{(UserExist) ?
-          (<div><MainPage ConnectToWalletButtonHandler={ConnectToWalletButtonHandler} GetFriendList={GetFriendList} setTO={setTO} To={To} /></div>)
+          (<div><MainPage  /></div>)
           :
           (<>{(Connected) ? (<CreateAccount ></CreateAccount>) : (<></>)}</>)
         }
@@ -174,7 +151,7 @@ function App() {
             (<></>)
             :
             (<div>
-              <Homepage ConnectToWalletButtonHandler={ConnectToWalletButtonHandler}></Homepage>
+              <Homepage ></Homepage>
             </div>)
         }
 
