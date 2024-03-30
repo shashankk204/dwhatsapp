@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import {  useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { SetActive } from '../store/Active';
-import { SetFriendList } from '../store/FriendList';
+import {  SetFriendList } from '../store/FriendList';
 
 import { GetContract } from '../Utils/Util';
 
@@ -39,8 +39,7 @@ const FriendlistItemStyle = {
 
 
 
-const Friends = ({ GetFriendList, OpenMessage }) => {
-    const Connected = useSelector(state => state.Connected.value)
+const Friends = ({  OpenMessage }) => {
     const [frnTxt, SetfrnTxt] = useState("");
     const dis = useDispatch()
     const FriendList = useSelector(state => state.FriendList.value)
@@ -66,15 +65,11 @@ const Friends = ({ GetFriendList, OpenMessage }) => {
         setdisabled(false);
     }
 
+    
+     
 
 
-    useEffect(() => {
-
-        if (Connected) {
-            GetFriendList()
-        };
-
-    }, []);
+    
 
 
 

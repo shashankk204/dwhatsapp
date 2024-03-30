@@ -1,17 +1,18 @@
 import { useDispatch } from "react-redux";
-import { useState } from "react";
-
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 
 import { SetUserExist } from "../store/UserExist";
 import { SetUserName } from "../store/UserName";
-import { GetContract } from "../Utils/Util";
+import { GetContract, GetSigner } from "../Utils/Util";
 
 
 const CreateAccount = () => {
     
     const [Txt,SetTxt]=useState("")
     const dis=useDispatch()
+    const navigate = useNavigate();
     
      
     
@@ -21,9 +22,12 @@ const CreateAccount = () => {
             const contract =await GetContract();
             const txresponse=await contract["CreateNewUser(string calldata)"](Txt);
             const recept=await txresponse.wait();
-
             dis(SetUserExist(true));
             dis(SetUserName(Txt));
+            if(recept)
+            {
+                navigate('/main');
+            }
             
             
         }
@@ -33,6 +37,31 @@ const CreateAccount = () => {
         }
     }
 
+
+    const CheckUserExist=async ()=>
+    {
+        let accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        if(accounts.length !== 0)
+        {
+            let signer = await GetSigner();
+            const contract = await GetContract();
+            let bool = await contract.CheckUser(signer);
+            if(bool)
+            {
+                console.log("hello")
+                navigate('/main');
+            }
+        }
+        else
+        {
+            navigate('/');
+        }
+
+    }
+    useEffect(()=>{
+        CheckUserExist();
+
+    },[])
 
 
     return (<>

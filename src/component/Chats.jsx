@@ -10,7 +10,7 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import SendIcon from '@mui/icons-material/Send';
 
 
-const Chats = ({TO, ConnectToWalletButtonHandler }) => {
+const Chats = ({TO}) => {
 
     const [Messagetxt, SetMessagetxt] = useState("");
    
@@ -86,7 +86,7 @@ const Chats = ({TO, ConnectToWalletButtonHandler }) => {
                             </span>
                             <span>
 
-                                <Nav ConnectToWalletButtonHandler={ConnectToWalletButtonHandler}></Nav>
+                                <Nav ></Nav>
                             </span>
                         </h1>
 
@@ -113,7 +113,7 @@ const Chats = ({TO, ConnectToWalletButtonHandler }) => {
                         <div className="bg-gray-200 py-3 flex justify-center">
 
                             <input type="text" placeholder='Type your Message' className='w-96 px-2 py-3 rounded-3xl' value={Messagetxt} onChange={(e) => { SetMessagetxt(e.target.value) }} />
-                            {/* <button className="bg-blue-800" onClick={sendMessage}>Send</button> */}
+                            
                             <LoadingButton
                                 onClick={sendMessage}
                                 endIcon={<SendIcon />}
