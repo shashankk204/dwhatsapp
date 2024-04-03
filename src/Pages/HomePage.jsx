@@ -61,9 +61,12 @@ const HomePage = () => {
     }
     return (
         <>
-            <button className="bg-blue-300 rounded-lg p-1" onClick={ConnectToWalletButtonHandler}>
-                {"connect"}
-            </button>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'rgb(131,58,180)', background: 'linear-gradient(90deg, rgba(131,58,180,1) 0%, rgba(146,37,37,1) 50%, rgba(252,176,69,1) 100%)' }}>
+                <button className="bg-gray-500 rounded-lg p-4" onClick={ConnectToWalletButtonHandler}>
+                    {"Launch App"}
+                </button>
+            </div>
+
         </>
     )
 
