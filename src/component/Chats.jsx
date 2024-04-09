@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 
+import {  SetallMessage } from '../store/allMessage';
+
 import { GetContract, GetContractWithOutSigner, GetSigner } from '../Utils/Util';
 
 
